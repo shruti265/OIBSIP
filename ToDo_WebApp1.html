@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDo App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f2f4f8;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 600px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #2770b8;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 16px;
+      color: #495057;
+      margin-bottom: 10px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 14px;
+      width: calc(100% - 20px);
+      box-sizing: border-box;
+      margin-bottom: 20px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 14px;
+      background-color: #2770b8;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2a5a8a;
+    }
+
+    #tasks-container {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    h2 {
+      color: #343a40;
+      margin-top: 20px;
+    }
+
+    .task {
+      margin-bottom: 20px;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .completed-task {
+      text-decoration: line-through;
+      color: #6c757d;
+    }
+
+    .task button {
+      padding: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .task button:hover {
+      background-color: #e0e0e0;
+    }
+
+    /* Responsive design for mobile devices */
+    @media only screen and (max-width: 600px) {
+      body {
+        margin: 20px;
+      }
+
+      .container {
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ToDo App</h1>
+
+    <label for="task">Add Task:</label>
+    <input type="text" id="task" placeholder="Enter your task">
+    <button onclick="addTask()">Add</button>
+
+    <div id="tasks-container">
+      <h2>Pending Tasks</h2>
+      <div id="pending-tasks"></div>
+
+      <h2>Completed Tasks</h2>
+      <div id="completed-tasks"></div>
+    </div>
+  </div>
+
+  <script>
+    function addTask() {
+      const taskInput = document.getElementById('task');
+      const task = taskInput.value.trim();
+
+      if (task !== '') {
+        const taskObj = {
+          text: task,
+          date: new Date().toLocaleString(),
+          completed: false
+        };
+
+        // Save task to local storage
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks.push(taskObj);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+
+        // Refresh the task lists
+        displayTasks();
+      }
+
+      // Clear the input field
+      taskInput.value = '';
+    }
+
+    function toggleComplete(index) {
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks[index].completed = !tasks[index].completed;
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+
+      // Refresh the task lists
+      displayTasks();
+    }
+
+    function deleteTask(index) {
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.splice(index, 1);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+
+      // Refresh the task lists
+      displayTasks();
+    }
+
+    function displayTasks() {
+      const pendingTasksContainer = document.getElementById('pending-tasks');
+      const completedTasksContainer = document.getElementById('completed-tasks');
+
+      // Clear existing tasks
+      pendingTasksContainer.innerHTML = '';
+      completedTasksContainer.innerHTML = '';
+
+      // Retrieve tasks from local storage
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+      tasks.forEach((task, index) => {
+        const taskElement = document.createElement('div');
+        taskElement.className = 'task';
+        taskElement.innerHTML = `
+          <span class="${task.completed ? 'completed-task' : ''}">${task.text} - ${task.date}</span>
+          <button onclick="toggleComplete(${index})">${task.completed ? 'Undo' : 'Complete'}</button>
+          <button onclick="deleteTask(${index})">Delete</button>
+        `;
+
+        if (task.completed) {
+          completedTasksContainer.appendChild(taskElement);
+        } else {
+          pendingTasksContainer.appendChild(taskElement);
+        }
+      });
+    }
+
+    // Display tasks on page load
+    displayTasks();
+  </script>
+</body>
+</html>
